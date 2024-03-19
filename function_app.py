@@ -4,8 +4,8 @@ import logging
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 
-@app.route(route="http_trigger", auth_level=func.AuthLevel.FUNCTION)
-def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="ocr_image", auth_level=func.AuthLevel.FUNCTION)
+def ocr_image(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
 
     name = req.params.get("name")
