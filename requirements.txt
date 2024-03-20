@@ -5,4 +5,5 @@
 azure-functions
 flair
 pytesseract
+pytest
 torch
