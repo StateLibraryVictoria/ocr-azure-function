@@ -10,6 +10,7 @@ pytesseract = "*"
 pytest = "*"
 torch = "*"
 azure-storage-file-datalake = "*"
+pandas = "*"
 
 [dev-packages]
 
