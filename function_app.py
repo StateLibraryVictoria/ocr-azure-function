@@ -15,7 +15,7 @@ def ocr(req: func.HttpRequest) -> func.HttpResponse:
         return response
 
     except Exception as e:
-        logging.error("An error occurred invoking OCR operation: {e}")
+        logging.error(f"An error occurred invoking OCR operation: {e}")
 
 
 @app.route(route="named_entity_recognition", auth_level=func.AuthLevel.FUNCTION)
