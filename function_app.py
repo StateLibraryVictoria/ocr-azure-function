@@ -1,7 +1,8 @@
 import azure.functions as func
 import logging
 
-from src.despatch_job import despatch_job
+# from src.despatch_job import despatch_job
+from .src.despatch_job import despatch_job
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
