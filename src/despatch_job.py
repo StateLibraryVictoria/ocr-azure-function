@@ -1,7 +1,8 @@
 import azure.functions as func
 import logging
 
-from src import op_ocr, shared_helpers
+# from src import op_ocr, shared_helpers
+from . import op_ocr, shared_helpers
 
 
 def get_operation_function(operation):
