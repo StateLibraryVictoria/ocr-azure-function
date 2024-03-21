@@ -2,7 +2,7 @@ import azure.functions as func
 import logging
 
 # from src.despatch_job import despatch_job
-from .src.despatch_job import despatch_job
+from .src import despatch_job
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -11,7 +11,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 def ocr(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("OCR function invoked")
     try:
-        response = despatch_job(req)
+        response = despatch_job.despatch_job(req)
         return response
 
     except Exception as e:
