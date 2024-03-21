@@ -2,7 +2,7 @@ import json
 import pytest
 import azure.functions as func
 
-from despatch_job import get_operation_function, parse_http_request, despatch_job
+from src.despatch_job import get_operation_function, parse_http_request, despatch_job
 from src.op_ocr import ocr_image
 
 

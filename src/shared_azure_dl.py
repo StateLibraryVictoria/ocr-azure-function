@@ -4,7 +4,7 @@ import io
 from PIL import Image
 import pandas as pd
 
-from azure.storage.filedatalake import DataLakeFileClient, DataLakeServiceClient
+from azure.storage.filedatalake import DataLakeFileClient
 
 
 def read_file_from_data_lake(file_path: str, file_system="raw"):
