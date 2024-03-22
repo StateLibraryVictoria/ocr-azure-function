@@ -1,4 +1,4 @@
-def get_file_id(file_path: str) -> str | bool:
+def get_file_id(file_path: str):
     """Converts the file-path of the Azure storage blob to a consistent id, allowing an image and it's derivatives to be tracked throughout the pipeline
 
     Args:
