@@ -11,24 +11,26 @@ def ocr(req: func.HttpRequest) -> func.HttpResponse:
 
     logging.info("OCR function invoked")
     try:
-
         response = despatch_job.despatch_job(req)
         return response
 
     except Exception as e:
-        logging.error(f"An error occurred invoking OCR operation: {e}")
+        error_msg = f"Failed: OCR operation error {e}"
+        logging.error(error_msg)
 
-        return func.HttpResponse("OCR failed")
+        return func.HttpResponse(error_msg)
 
 
-@app.route(route="named_entity_recognition", auth_level=func.AuthLevel.ANONYMOUS)
-def named_entity_recognition(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="ner", auth_level=func.AuthLevel.ANONYMOUS)
+def ner(req: func.HttpRequest) -> func.HttpResponse:
+
+    logging.info("NER function invoked")
     try:
-
         response = despatch_job.despatch_job(req)
         return response
 
     except Exception as e:
-        logging.error(f"An error occurred invoking OCR operation: {e}")
+        error_msg = f"Failed: NER operation error {e}"
+        logging.error(error_msg)
 
-        return func.HttpResponse("Named entity recognition failed")
+        return func.HttpResponse(error_msg)

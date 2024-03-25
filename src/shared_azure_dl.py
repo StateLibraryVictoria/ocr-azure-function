@@ -3,6 +3,8 @@ import os
 import io
 from PIL import Image
 import pandas as pd
+import re
+from unidecode import unidecode
 
 from azure.storage.filedatalake import DataLakeFileClient
 
@@ -29,8 +31,11 @@ def read_file_from_data_lake(file_path: str, file_system="raw"):
         return False
 
 
-def read_image_from_data_lake(file_path: str, file_system="raw"):
+def read_image_from_data_lake(file_id: str, file_system="raw", image_file_suffix="jpg"):
     try:
+
+        file_path = f"image-pipeline/image-capture/{file_id}.{image_file_suffix}"
+
         data_lake_image_bytes = read_file_from_data_lake(file_path)
 
         image = Image.open(io.BytesIO(data_lake_image_bytes))
@@ -75,13 +80,25 @@ def upload_dataframe_to_data_lake(
     file_system="raw",
     pipeline="image-pipeline",
     file_suffix="txt",
+    columns_supplied=True,
 ):
     file_path = f"{pipeline}/{operation}/{file_id}.{file_suffix}"
 
+    dataframe = dataframe.replace(r"\n", " ", regex=True)
+    dataframe = dataframe.replace(r"\r", " ", regex=True)
+    dataframe = dataframe.replace(r"\x0c", " ", regex=True)
+
+    # clean up special characters for all text columns
+    object_columns = list(dataframe.select_dtypes(include=["object"]).columns)
+    dataframe[object_columns] = dataframe[object_columns].astype("str")
+    for col in object_columns:
+        dataframe[col] = dataframe[col].apply(unidecode)
+        dataframe[col] = dataframe[col].replace(re.escape(delimiter), " ", regex=True)
+
     content_list = dataframe.values.tolist()
 
-    # if columns_supplied:
-    #     content_list.insert(0, list(dataframe.columns))
+    if columns_supplied:
+        content_list.insert(0, list(dataframe.columns))
 
     file_contents = [f"{delimiter}".join(map(str, content)) for content in content_list]
     file_contents = "\n".join(file_contents)
@@ -89,3 +106,33 @@ def upload_dataframe_to_data_lake(
     uploaded = upload_to_data_lake(file_system, file_path, file_contents)
 
     return uploaded
+
+
+def read_df_from_data_lake(
+    pipeline: str,
+    operation: str,
+    file_id: str,
+    file_suffix="txt",
+    delimiter=",",
+    add_column_names=True,
+    file_system="raw",
+):
+
+    file_path = f"{pipeline}/{operation}/{file_id}.{file_suffix}"
+
+    file_contents = read_file_from_data_lake(file_path)
+    file_contents = file_contents.decode("utf-8")
+
+    if not file_contents:
+        logging.error(f"Unable to create dataframe for {file_system}/{file_path}")
+        return False
+    split_contents = [
+        label.split(f"{delimiter}") for label in file_contents.splitlines()
+    ]
+
+    df = pd.DataFrame(data=split_contents)
+    if add_column_names:
+        df = df.rename(columns=df.iloc[0])
+    df = df.drop(df.index[0])
+
+    return df

@@ -11,6 +11,7 @@ pytest = "*"
 torch = "*"
 azure-storage-file-datalake = "*"
 pandas = "*"
+unidecode = "*"
 
 [dev-packages]
 
