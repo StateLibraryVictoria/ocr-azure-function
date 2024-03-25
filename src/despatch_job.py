@@ -27,7 +27,7 @@ def parse_http_request(req: func.HttpRequest) -> dict:
     return parsed_request
 
 
-def despatch_job(req: func.HttpRequest) -> func.HttpResponse:
+def despatch_job(req: func.HttpRequest, kwargs={}) -> func.HttpResponse:
 
     request_params = parse_http_request(req)
 
@@ -40,7 +40,7 @@ def despatch_job(req: func.HttpRequest) -> func.HttpResponse:
 
     op_function = get_operation_function(operation)
 
-    operation_completed = op_function(file_id)
+    operation_completed = op_function(file_id, **kwargs)
 
     if operation_completed:
         logging.info(f"{operation} complete for {file_id}")
