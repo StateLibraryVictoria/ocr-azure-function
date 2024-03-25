@@ -46,4 +46,4 @@ jobs:
         app-name: 'ocr-az-func'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_449769fb48054f19ab8e6d97a1e375c8 }}
-        images: 'index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ocrazfunc:latest
+        images: 'index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ocrazfunc:latest'
