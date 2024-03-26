@@ -11,7 +11,4 @@ RUN pip install -r /requirements.txt
 RUN apt-get update && apt-get install -y \
 tesseract-ocr
 
-ADD download_models.py /home/download_models.py
-RUN python /home/download_models.py
-
 COPY . /home/site/wwwroot
