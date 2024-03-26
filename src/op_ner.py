@@ -4,14 +4,15 @@ import re
 
 from flair.data import Sentence
 from segtok.segmenter import split_single
+from flair.models import SequenceTagger
+
+from . import shared_helpers, shared_azure_dl, shared_constants
 
 
-from . import shared_helpers, shared_azure_dl
-
-
-def get_named_entities(ocr_text: str, tagger) -> list:
+def get_named_entities(ocr_text: str) -> list:
 
     sentence = [Sentence(sent, use_tokenizer=True) for sent in split_single(ocr_text)]
+    tagger = SequenceTagger.load(shared_constants.HF_NER_MODEL)
 
     tagger.predict(sentence)
 
@@ -25,9 +26,6 @@ def get_named_entities(ocr_text: str, tagger) -> list:
     logging.info(f"{len(entities)} named entities recognised")
 
     return entities
-
-
-get_named_entities("Melbourne University is a university 10th Feb 2024")
 
 
 def format_named_entity(entity: str) -> dict:
@@ -50,15 +48,15 @@ def format_named_entity(entity: str) -> dict:
     return formatted_entity
 
 
-def ner_ocr_output(file_id: str, tagger=None):
+def ner_ocr_output(file_id: str):
 
     ocr_df = shared_azure_dl.read_df_from_data_lake(
-        "image-pipeline", "ocr", file_id, add_column_names=False
+        "image-pipeline", "ocr", file_id, add_column_names=True
     )
 
     ocr_text = shared_helpers.convert_df_column_to_string(ocr_df, "text")
 
-    ner = get_named_entities(ocr_text, tagger)
+    ner = get_named_entities(ocr_text)
 
     ner_list = [format_named_entity(entity) for entity in ner]
 
