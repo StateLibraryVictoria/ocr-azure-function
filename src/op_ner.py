@@ -13,6 +13,9 @@ def get_named_entities(ocr_text: str) -> list:
 
     sentence = [Sentence(sent, use_tokenizer=True) for sent in split_single(ocr_text)]
     tagger = SequenceTagger.load(shared_constants.HF_NER_MODEL)
+    logging.info(
+        f"MODEL location {SequenceTagger._fetch_model(shared_constants.HF_NER_MODEL)}"
+    )
 
     tagger.predict(sentence)
 
