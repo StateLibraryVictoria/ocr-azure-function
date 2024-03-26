@@ -13,6 +13,7 @@ tesseract-ocr
 
 # Run the install_models python file
 COPY download_models.py ./
+
 CMD ["python", "./download_models.py"]
 
 
