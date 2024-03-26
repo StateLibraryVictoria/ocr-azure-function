@@ -34,17 +34,21 @@ def ner_orchestrator(context):
 
     # call ner function for all file_ids
 
-    result1 = yield context.call_activity("ner", "Seattle")
-    result2 = yield context.call_activity("ner", "Tokyo")
-    result3 = yield context.call_activity("ner", "London")
+    # result1 = yield context.call_activity("ner", "Seattle")
+    # result2 = yield context.call_activity("ner", "Tokyo")
+    # result3 = yield context.call_activity("ner", "London")
+
+    result1 = "Result 1"
+    result2 = "Result 2"
+    result3 = "Result 3"
 
     return [result1, result2, result3]
 
 
-@dfApp.activity_trigger(input_name="file_id")
-def ner(file_id: str):
-    logging.info(f"NER {file_id}")
-    return f"Hello {file_id}"
+# @dfApp.activity_trigger(input_name="file_id")
+# def ner(file_id: str):
+#     logging.info(f"NER {file_id}")
+#     return f"Hello {file_id}"
 
 
 # app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
