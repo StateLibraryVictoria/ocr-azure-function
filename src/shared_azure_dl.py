@@ -6,7 +6,7 @@ import pandas as pd
 import re
 from unidecode import unidecode
 
-from azure.storage.filedatalake import DataLakeFileClient
+from azure.storage.filedatalake import DataLakeFileClient, DataLakeServiceClient
 
 
 def read_file_from_data_lake(file_path: str, file_system="raw"):
@@ -136,3 +136,21 @@ def read_df_from_data_lake(
     df = df.drop(df.index[0])
 
     return df
+
+
+def list_filenames_from_data_lake(path: str, file_system="raw"):
+    connection_str = os.environ.get("DATA_LAKE_CONNECTION_STRING")
+
+    datalake_service_client = DataLakeServiceClient.from_connection_string(
+        connection_str
+    )
+    file_system_client = datalake_service_client.get_file_system_client(file_system)
+
+    path_list = file_system_client.get_paths(path)
+
+    file_list = [path.get("name") for path in path_list]
+
+    return file_list
+
+
+print(list_filenames_from_data_lake("image-pipeline/image-capture/018-POC/"))
