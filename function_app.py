@@ -17,7 +17,8 @@ dfApp = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 async def http_start(req: func.HttpRequest, client):
     logging.info("HTTP START")
     function_name = req.route_params.get("functionName")
-    instance_id = await client.start_new(function_name)
+    payload = despatch_job.parse_http_request(req)
+    instance_id = await client.start_new(function_name, None, payload)
     response = client.create_check_status_response(req, instance_id)
     return response
 
@@ -25,18 +26,20 @@ async def http_start(req: func.HttpRequest, client):
 @dfApp.orchestration_trigger(context_name="context")
 def ner_orchestrator(context):
     logging.info("ORC TRIG")
-    logging.info(f"CONTEXT {context}")
-    # blob_path = context
+    input_context = context.get_input()
+    blob_path = input_context.get("blob_path")
+    logging.info(f"Blob path {blob_path}")
+
     # load tagger
     # tagger = SequenceTagger.load(shared_constants.HF_NER_MODEL)
+
     # get list of file_ids
-    # file_list = shared_azure_dl.list_filenames_from_data_lake(blob_path)
+    file_list = shared_azure_dl.list_filenames_from_data_lake(blob_path)
+    logging.info(f"{len(file_list)} files on blob {blob_path}")
 
     # call ner function for all file_ids
 
     # result1 = yield context.call_activity("ner", "Seattle")
-    # result2 = yield context.call_activity("ner", "Tokyo")
-    # result3 = yield context.call_activity("ner", "London")
 
     result1 = "Result 1"
     result2 = "Result 2"
