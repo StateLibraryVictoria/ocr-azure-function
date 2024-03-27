@@ -1,55 +1,22 @@
-import logging
 import pandas as pd
-import re
-
-from flair.data import Sentence
-from segtok.segmenter import split_single
-from flair.models import SequenceTagger
+import os
 
 from . import shared_helpers, shared_azure_dl, shared_constants
 
-
-def get_named_entities(ocr_text: str) -> list:
-
-    sentence = [Sentence(sent, use_tokenizer=True) for sent in split_single(ocr_text)]
-    tagger = SequenceTagger.load(shared_constants.HF_NER_MODEL)
-    logging.info(
-        f"MODEL location {SequenceTagger._fetch_model(shared_constants.HF_NER_MODEL)}"
-    )
-
-    tagger.predict(sentence)
-
-    entities = []
-
-    for token in sentence:
-        for entity in token.get_spans("ner"):
-            entity = str(entity)
-            entities.append(entity)
-
-    logging.info(f"{len(entities)} named entities recognised")
-
-    return entities
+import requests
 
 
-def format_named_entity(entity: str) -> dict:
+def get_named_entities(payload: dict) -> list:
 
-    span_re = re.search(r"\d+:\d+", entity)
+    headers = {"Authorization": f"Bearer {os.environ.get("HF_API_KEY")}"}
 
-    named_entity_re = re.search(r'(?<=")(.*?)(?=")', entity)
+    response = requests.post(shared_constants.HF_NER_API_URL, headers=headers, json=payload)
 
-    category_re = re.search(r"(?<=→\s)(.*?)(?=\s\()", entity)
+    if response.status_code == 503:
+        payload["wait_for_model"] = True
+        return get_named_entities(payload)
 
-    score_re = re.search(r"(?<=\()(.*?)(?=\))", entity)
-
-    formatted_entity = {
-        "span": span_re.group(),
-        "named_entity": named_entity_re.group(),
-        "category": category_re.group(),
-        "score": score_re.group(),
-    }
-
-    return formatted_entity
-
+    return response.json()
 
 def ner_ocr_output(file_id: str):
 
@@ -59,9 +26,9 @@ def ner_ocr_output(file_id: str):
 
     ocr_text = shared_helpers.convert_df_column_to_string(ocr_df, "text")
 
-    ner = get_named_entities(ocr_text)
+    payload = { "inputs": ocr_text }
 
-    ner_list = [format_named_entity(entity) for entity in ner]
+    ner_list = get_named_entities(payload)
 
     ner_df = pd.DataFrame(ner_list)
 

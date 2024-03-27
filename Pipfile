@@ -5,14 +5,12 @@ name = "pypi"
 
 [packages]
 azure-functions = "*"
-flair = "*"
 pytesseract = "*"
 pytest = "*"
 torch = "*"
 azure-storage-file-datalake = "*"
 pandas = "*"
 unidecode = "*"
-azure-functions-durable = "*"
 
 [dev-packages]
 
