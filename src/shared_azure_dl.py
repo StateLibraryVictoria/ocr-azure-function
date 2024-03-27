@@ -151,6 +151,3 @@ def list_filenames_from_data_lake(path: str, file_system="raw"):
     file_list = [path.get("name") for path in path_list]
 
     return file_list
-
-
-print(list_filenames_from_data_lake("image-pipeline/image-capture/018-POC/"))
