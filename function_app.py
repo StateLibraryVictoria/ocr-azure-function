@@ -1,5 +1,4 @@
 import azure.functions as func
-from flair.models import SequenceTagger
 
 import logging
 
