@@ -43,13 +43,22 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
 
     name = req.params.get("name")
-    if not name:
+
+    try:
+        logging.info("OCR function invoked")
         try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            name = req_body.get("name")
+            from src import despatch_job
+
+            response = despatch_job.despatch_job(req)
+            return response
+
+        except Exception as e:
+            error_msg = f"Failed: OCR operation error {e}"
+            logging.error(error_msg)
+
+            return func.HttpResponse(error_msg)
+    except Exception as e:
+        logging.error(f"ERROR {e}")
 
     if name:
         return func.HttpResponse(
