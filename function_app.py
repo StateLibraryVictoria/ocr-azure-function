@@ -1,25 +1,26 @@
 import azure.functions as func
 
-# import logging
+import logging
 
-# from src import despatch_job
+from src import despatch_job
 
-# app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
-# @app.route(route="ocr", auth_level=func.AuthLevel.ANONYMOUS)
-# def ocr(req: func.HttpRequest) -> func.HttpResponse:
+@app.function_name(name="ocr")
+@app.route(route="ocr", auth_level=func.AuthLevel.ANONYMOUS)
+def ocr(req: func.HttpRequest) -> func.HttpResponse:
 
-#     logging.info("OCR function invoked")
-#     try:
-#         response = despatch_job.despatch_job(req)
-#         return response
+    logging.info("OCR function invoked")
+    try:
+        response = despatch_job.despatch_job(req)
+        return response
 
-#     except Exception as e:
-#         error_msg = f"Failed: OCR operation error {e}"
-#         logging.error(error_msg)
+    except Exception as e:
+        error_msg = f"Failed: OCR operation error {e}"
+        logging.error(error_msg)
 
-#         return func.HttpResponse(error_msg)
+        return func.HttpResponse(error_msg)
 
 
 # @app.route(route="ner", auth_level=func.AuthLevel.ANONYMOUS)
