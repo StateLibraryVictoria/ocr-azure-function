@@ -24,8 +24,15 @@ async def http_start(req: func.HttpRequest, client):
 
 
 @dfApp.orchestration_trigger(context_name="context")
+def ocr_orchestrator(context):
+    logging.info("OCR orchestrator triggered")
+
+    return "Placeholder"
+
+
+@dfApp.orchestration_trigger(context_name="context")
 def ner_orchestrator(context):
-    logging.info("ORC TRIG")
+    logging.info("OCR orchestrator triggered")
     input_context = context.get_input()
     blob_path = input_context.get("blob_path")
     logging.info(f"Blob path {blob_path}")
