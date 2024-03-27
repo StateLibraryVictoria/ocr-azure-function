@@ -8,15 +8,18 @@ import requests
 
 def get_named_entities(payload: dict) -> list:
 
-    headers = {"Authorization": f"Bearer {os.environ.get("HF_API_KEY")}"}
+    headers = {"Authorization": f"Bearer {os.environ.get('HF_API_KEY')}"}
 
-    response = requests.post(shared_constants.HF_NER_API_URL, headers=headers, json=payload)
+    response = requests.post(
+        shared_constants.HF_NER_API_URL, headers=headers, json=payload
+    )
 
     if response.status_code == 503:
         payload["wait_for_model"] = True
         return get_named_entities(payload)
 
     return response.json()
+
 
 def ner_ocr_output(file_id: str):
 
@@ -26,7 +29,7 @@ def ner_ocr_output(file_id: str):
 
     ocr_text = shared_helpers.convert_df_column_to_string(ocr_df, "text")
 
-    payload = { "inputs": ocr_text }
+    payload = {"inputs": ocr_text}
 
     ner_list = get_named_entities(payload)
 
