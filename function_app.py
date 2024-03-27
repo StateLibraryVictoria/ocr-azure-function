@@ -4,7 +4,7 @@ from flair.models import SequenceTagger
 
 import logging
 
-from src import despatch_job, shared_constants, shared_azure_dl, shared_helpers
+from src import despatch_job, shared_constants, shared_azure_dl, shared_helpers, op_ocr
 
 
 # function 1 call OCR on all files
@@ -27,35 +27,57 @@ async def http_start(req: func.HttpRequest, client):
 def ocr_orchestrator(context):
     logging.info("OCR orchestrator triggered")
 
-    return "Placeholder"
+    input_context = context.get_input()
+    blob_path = input_context.get("blob_path")
+    logging.info(f"Blob path {blob_path}")
+
+    # get list of file_ids
+    file_list = shared_azure_dl.list_filenames_from_data_lake(blob_path)
+    file_ids = [shared_helpers.get_file_id(file) for file in file_list]
+    logging.info(f"{len(file_ids)} files on blob {blob_path}")
+
+    tasks = [context.call_activity("ocr", file_id) for file_id in file_ids]
+    results = yield context.task_all(tasks)
+    logging.info(f"Results {results}")
+
+    return results
+
+
+@dfApp.activity_trigger(input_name="file_id")
+def ocr(file_id: str):
+    return op_ocr.ocr_image(file_id)
 
 
 @dfApp.orchestration_trigger(context_name="context")
 def ner_orchestrator(context):
-    logging.info("OCR orchestrator triggered")
+    logging.info("NER    orchestrator triggered")
     input_context = context.get_input()
     blob_path = input_context.get("blob_path")
     logging.info(f"Blob path {blob_path}")
 
     # load tagger
-    # tagger = SequenceTagger.load(shared_constants.HF_NER_MODEL)
+    try:
+        tagger = SequenceTagger.load(shared_constants.HF_NER_MODEL)
+        logging.info("Tagger loaded")
+    except Exception as e:
+        logging.warning(f"ERROR loading tagger: {e}")
 
     # get list of file_ids
     file_list = shared_azure_dl.list_filenames_from_data_lake(blob_path)
-    logging.info(f"{len(file_list)} files on blob {blob_path}")
-
     file_ids = [shared_helpers.get_file_id(file) for file in file_list]
+    logging.info(f"{len(file_ids)} files on blob {blob_path}")
 
     # call ner function for all file_ids
     tasks = [context.call_activity("ner", file_id) for file_id in file_ids]
     results = yield context.task_all(tasks)
+    logging.info(f"Results {results}")
 
     return results
 
 
 @dfApp.activity_trigger(input_name="file_id")
 def ner(file_id: str):
-    logging.info(f"NER {file_id}")
+    # logging.info(f"NER {file_id}")
     return f"Hello {file_id}"
 
 
