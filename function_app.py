@@ -7,7 +7,6 @@ from src import despatch_job
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
-# @app.function_name(name="ocr")
 @app.route(route="ocr", auth_level=func.AuthLevel.ANONYMOUS)
 def ocr(req: func.HttpRequest) -> func.HttpResponse:
 
@@ -38,34 +37,16 @@ def ner(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(error_msg)
 
 
-# @app.route(route="http_trigger", auth_level=func.AuthLevel.FUNCTION)
-# def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
-#     logging.info("Python HTTP trigger function processed a request.")
+@app.route(route="caption", auth_level=func.AuthLevel.ANONYMOUS)
+def caption(req: func.HttpRequest) -> func.HttpResponse:
 
-#     name = req.params.get("name")
+    logging.info("Image caption function invoked")
+    try:
+        response = despatch_job.despatch_job(req)
+        return response
 
-#     try:
-#         logging.info("OCR function invoked")
-#         try:
-#             from src import despatch_job
+    except Exception as e:
+        error_msg = f"Failed: image caption operation error {e}"
+        logging.error(error_msg)
 
-#             response = despatch_job.despatch_job(req)
-#             return response
-
-#         except Exception as e:
-#             error_msg = f"Failed: OCR operation error {e}"
-#             logging.error(error_msg)
-
-#             return func.HttpResponse(error_msg)
-#     except Exception as e:
-#         logging.error(f"ERROR {e}")
-
-#     if name:
-#         return func.HttpResponse(
-#             f"Hello, {name}. This HTTP triggered function executed successfully."
-#         )
-#     else:
-#         return func.HttpResponse(
-#             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-#             status_code=200,
-#         )
+        return func.HttpResponse(error_msg)

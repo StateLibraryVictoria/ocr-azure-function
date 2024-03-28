@@ -1,4 +1,8 @@
+import os
 import pandas as pd
+import requests
+
+from . import shared_constants
 
 
 def get_file_id(file_path: str):
@@ -38,3 +42,32 @@ def convert_df_column_to_string(
     column_str = column_to_convert.str.cat(sep=" ")
 
     return column_str
+
+
+def get_named_entities(payload: dict) -> list:
+
+    headers = {"Authorization": f"Bearer {os.environ.get('HF_API_KEY')}"}
+
+    response = requests.post(
+        shared_constants.HF_API_URL_STEM, headers=headers, json=payload
+    )
+
+    if response.status_code == 503:
+        payload["wait_for_model"] = True
+        return get_named_entities(payload)
+
+    return response.json()
+
+
+def call_hf_model(model: str, payload={}, data={}):
+
+    hf_model_api = f"{shared_constants.HF_API_URL_STEM}/{model}"
+
+    headers = {"Authorization": f"Bearer {os.environ.get('HF_API_KEY')}"}
+
+    response = requests.post(hf_model_api, headers=headers, json=payload, data=data)
+    if response.status_code == 503:
+        payload["wait_for_model"] = True
+        return call_hf_model(model, payload=payload, data=data)
+
+    return response.json()

@@ -1,7 +1,7 @@
 import azure.functions as func
 import logging
 
-from . import op_ner, op_ocr, shared_helpers
+from . import op_ner, op_ocr, op_image_caption, shared_helpers
 
 
 def get_operation_function(operation):
@@ -9,6 +9,7 @@ def get_operation_function(operation):
     operations = {
         "ocr": op_ocr.ocr_image,
         "ner": op_ner.ner_ocr_output,
+        "caption": op_image_caption.caption_image,
     }
 
     op_function = operations.get(operation)

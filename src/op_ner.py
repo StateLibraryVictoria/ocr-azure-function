@@ -1,24 +1,7 @@
+import logging
 import pandas as pd
-import os
 
 from . import shared_helpers, shared_azure_dl, shared_constants
-
-import requests
-
-
-def get_named_entities(payload: dict) -> list:
-
-    headers = {"Authorization": f"Bearer {os.environ.get('HF_API_KEY')}"}
-
-    response = requests.post(
-        shared_constants.HF_NER_API_URL, headers=headers, json=payload
-    )
-
-    if response.status_code == 503:
-        payload["wait_for_model"] = True
-        return get_named_entities(payload)
-
-    return response.json()
 
 
 def ner_ocr_output(file_id: str):
@@ -31,9 +14,13 @@ def ner_ocr_output(file_id: str):
 
     payload = {"inputs": ocr_text}
 
-    ner_list = get_named_entities(payload)
+    ner_list = shared_helpers.call_hf_model(
+        shared_constants.HF_NER_MODEL, payload=payload
+    )
 
     ner_df = pd.DataFrame(ner_list)
+
+    logging.info(f"{len(ner_list)} named entities recognised for {file_id}")
 
     upload = shared_azure_dl.upload_dataframe_to_data_lake("ner", ner_df, file_id)
 

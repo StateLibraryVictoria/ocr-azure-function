@@ -1,7 +1,5 @@
 import logging
 import os
-import io
-from PIL import Image
 import pandas as pd
 import re
 from unidecode import unidecode
@@ -38,9 +36,7 @@ def read_image_from_data_lake(file_id: str, file_system="raw", image_file_suffix
 
         data_lake_image_bytes = read_file_from_data_lake(file_path)
 
-        image = Image.open(io.BytesIO(data_lake_image_bytes))
-
-        return image
+        return data_lake_image_bytes
 
     except Exception as e:
         logging.error(
@@ -59,8 +55,11 @@ def upload_to_data_lake(file_system: str, file_path: str, file_contents: str) ->
         )
 
         file_client.create_file()
-        file_client.append_data(file_contents, offset=0, length=len(file_contents))
-        file_client.flush_data(len(file_contents))
+
+        if file_contents:
+            file_client.append_data(file_contents, offset=0, length=len(file_contents))
+            file_client.flush_data(len(file_contents))
+
         logging.info(f"{file_path} uploaded successfully to {file_system}")
 
         return True
@@ -84,24 +83,34 @@ def upload_dataframe_to_data_lake(
 ):
     file_path = f"{pipeline}/{operation}/{file_id}.{file_suffix}"
 
-    dataframe = dataframe.replace(r"\n", " ", regex=True)
-    dataframe = dataframe.replace(r"\r", " ", regex=True)
-    dataframe = dataframe.replace(r"\x0c", " ", regex=True)
+    if len(dataframe) > 0:
 
-    # clean up special characters for all text columns
-    object_columns = list(dataframe.select_dtypes(include=["object"]).columns)
-    dataframe[object_columns] = dataframe[object_columns].astype("str")
-    for col in object_columns:
-        dataframe[col] = dataframe[col].apply(unidecode)
-        dataframe[col] = dataframe[col].replace(re.escape(delimiter), " ", regex=True)
+        dataframe = dataframe.replace(r"\n", " ", regex=True)
+        dataframe = dataframe.replace(r"\r", " ", regex=True)
+        dataframe = dataframe.replace(r"\x0c", " ", regex=True)
 
-    content_list = dataframe.values.tolist()
+        # clean up special characters for all text columns
+        object_columns = list(dataframe.select_dtypes(include=["object"]).columns)
+        dataframe[object_columns] = dataframe[object_columns].astype("str")
+        for col in object_columns:
+            dataframe[col] = dataframe[col].apply(unidecode)
+            dataframe[col] = dataframe[col].replace(
+                re.escape(delimiter), " ", regex=True
+            )
 
-    if columns_supplied:
-        content_list.insert(0, list(dataframe.columns))
+        content_list = dataframe.values.tolist()
 
-    file_contents = [f"{delimiter}".join(map(str, content)) for content in content_list]
-    file_contents = "\n".join(file_contents)
+        if columns_supplied:
+            content_list.insert(0, list(dataframe.columns))
+
+        file_contents = [
+            f"{delimiter}".join(map(str, content)) for content in content_list
+        ]
+        file_contents = "\n".join(file_contents)
+
+    else:
+        logging.info(f"Dataframe supplied for {file_id} empty")
+        file_contents = ""
 
     uploaded = upload_to_data_lake(file_system, file_path, file_contents)
 
