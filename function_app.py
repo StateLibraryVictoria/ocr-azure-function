@@ -50,3 +50,12 @@ def caption(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(error_msg)
 
         return func.HttpResponse(error_msg)
+
+
+
+@app.blob_trigger(arg_name="myblob", path="image-pipeline/image-capture",
+                               connection="slvdevdatalake_STORAGE") 
+def BlobTrigger(myblob: func.InputStream):
+    logging.info(f"Python blob trigger function processed blob"
+                f"Name: {myblob.name}"
+                f"Blob Size: {myblob.length} bytes")

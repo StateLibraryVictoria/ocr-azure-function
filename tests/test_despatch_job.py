@@ -4,12 +4,16 @@ import azure.functions as func
 
 from src.despatch_job import get_operation_function, parse_http_request, despatch_job
 from src.op_ocr import ocr_image
+from src.op_ner import ner_ocr_output
+from src.op_image_caption import caption_image
 
 
 @pytest.mark.parametrize(
     "test_input, expected",
     [
         ({"operation": "ocr"}, ocr_image),
+        ({"operation": "ner"}, ner_ocr_output),
+        ({"operation": "caption"}, caption_image),
         ({"operation": "Unfound"}, None),
     ],
 )
