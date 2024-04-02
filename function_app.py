@@ -14,19 +14,16 @@ def ocr(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="ner", auth_level=func.AuthLevel.ANONYMOUS)
 def ner(req: func.HttpRequest) -> func.HttpResponse:
-
     return despatch_job(req)
 
 
 @app.route(route="caption", auth_level=func.AuthLevel.ANONYMOUS)
 def caption(req: func.HttpRequest) -> func.HttpResponse:
-
     return despatch_job(req)
 
 
 @app.route(route="ingest-file", auth_level=func.AuthLevel.ANONYMOUS)
-def caption(req: func.HttpRequest) -> func.HttpResponse:
-
+def ingest_file(req: func.HttpRequest) -> func.HttpResponse:
     return despatch_job(req)
 
 
