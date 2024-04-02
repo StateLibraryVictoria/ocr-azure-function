@@ -100,6 +100,7 @@ def generate_ingest_file(filepath: str) -> bool:
         ingest_list.append(ingest_row)
 
     upload_df = pd.DataFrame(ingest_list)
+    upload_df["Top Container [indicator]"] = folder_name
     upload_ingest_file = shared_azure_dl.upload_dataframe_to_data_lake(
         "ingest-file", upload_df, folder_name
     )
