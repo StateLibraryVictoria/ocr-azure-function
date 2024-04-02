@@ -7,40 +7,27 @@ from src import despatch_job
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
-def handle_route(req: func.HttpRequest, route_name: str):
-    logging.info(f"{route_name} function invoked")
-    try:
-        response = despatch_job.despatch_job(req)
-        return response
-
-    except Exception as e:
-        error_msg = f"Failed: {route_name} operation error {e}"
-        logging.error(error_msg)
-
-        return func.HttpResponse(error_msg)
-
-
 @app.route(route="ocr", auth_level=func.AuthLevel.ANONYMOUS)
 def ocr(req: func.HttpRequest) -> func.HttpResponse:
-    return handle_route(req, "OCR")
+    return despatch_job(req)
 
 
 @app.route(route="ner", auth_level=func.AuthLevel.ANONYMOUS)
 def ner(req: func.HttpRequest) -> func.HttpResponse:
 
-    return handle_route(req, "Named entity recognition")
+    return despatch_job(req)
 
 
 @app.route(route="caption", auth_level=func.AuthLevel.ANONYMOUS)
 def caption(req: func.HttpRequest) -> func.HttpResponse:
 
-    return handle_route(req, "Image caption")
+    return despatch_job(req)
 
 
 @app.route(route="ingest-file", auth_level=func.AuthLevel.ANONYMOUS)
 def caption(req: func.HttpRequest) -> func.HttpResponse:
 
-    return handle_route(req, "Generate ingest file")
+    return despatch_job(req)
 
 
 @app.blob_trigger(

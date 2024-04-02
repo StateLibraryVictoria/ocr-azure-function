@@ -39,20 +39,25 @@ def despatch_job(req: func.HttpRequest) -> func.HttpResponse:
     operation = request_params.get("operation")
     op_function = get_operation_function(operation)
 
-    file_path = request_params.get("file_path")
-    folder_path = request_params.get("folder_path")
+    logging.info(f"{operation} function invoked")
 
-    if file_path:
+    try:
 
-        file_id = shared_helpers.get_file_id(file_path)
-        operation_completed = op_function(file_id)
+        file_path = request_params.get("file_path")
+        folder_path = request_params.get("folder_path")
 
-    elif folder_path:
-        operation_completed = op_function(folder_path)
+        if file_path:
+            file_id = shared_helpers.get_file_id(file_path)
+            operation_completed = op_function(file_id)
 
-    if operation_completed:
+        elif folder_path:
+            operation_completed = op_function(folder_path)
+
         logging.info(f"{operation} complete")
         return func.HttpResponse(str(operation_completed))
 
-    else:
-        logging.error(f"{operation} could not be completed for {file_id}")
+    except Exception as e:
+        error_msg = f"Failed: {operation} operation error {e}"
+        logging.error(error_msg)
+
+        return func.HttpResponse(error_msg)
