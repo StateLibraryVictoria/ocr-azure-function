@@ -32,7 +32,7 @@ def ingest_file(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.blob_trigger(
     arg_name="myblob",
-    path="raw/image-pipeline/image-capture",
+    path="raw/image-pipeline/image-capture/{folder}/{file_name}.jpg",
     connection="DATA_LAKE_CONNECTION_STRING",
 )
 def image_pipeline(myblob: func.InputStream):
