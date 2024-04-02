@@ -1,7 +1,7 @@
 import azure.functions as func
 import logging
 
-from . import op_ner, op_ocr, op_image_caption, shared_helpers
+from . import op_ner, op_ocr, op_image_caption, op_generate_ingest_file, shared_helpers
 
 
 def get_operation_function(operation):
@@ -10,6 +10,7 @@ def get_operation_function(operation):
         "ocr": op_ocr.ocr_image,
         "ner": op_ner.ner_ocr_output,
         "caption": op_image_caption.caption_image,
+        "ingest-file": op_generate_ingest_file.generate_ingest_file,
     }
 
     op_function = operations.get(operation)
@@ -36,15 +37,21 @@ def despatch_job(req: func.HttpRequest) -> func.HttpResponse:
         return False
 
     operation = request_params.get("operation")
-    file_path = request_params.get("file_path")
-    file_id = shared_helpers.get_file_id(file_path)
-
     op_function = get_operation_function(operation)
 
-    operation_completed = op_function(file_id)
+    file_path = request_params.get("file_path")
+    folder_path = request_params.get("folder_path")
+
+    if file_path:
+
+        file_id = shared_helpers.get_file_id(file_path)
+        operation_completed = op_function(file_id)
+
+    elif folder_path:
+        operation_completed = op_function(folder_path)
 
     if operation_completed:
-        logging.info(f"{operation} complete for {file_id}")
+        logging.info(f"{operation} complete")
         return func.HttpResponse(str(operation_completed))
 
     else:

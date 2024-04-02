@@ -4,8 +4,6 @@ import requests
 
 from . import shared_constants
 
-# import shared_constants
-
 
 def get_file_id(file_path: str):
     """Converts the file-path of the Azure storage blob to a consistent id, allowing an image and it's derivatives to be tracked throughout the pipeline
@@ -73,3 +71,10 @@ def call_hf_model(model: str, payload={}, data={}):
         return call_hf_model(model, payload=payload, data=data)
 
     return response.json()
+
+
+def get_folder_name(filepath: str) -> str:
+
+    split_file_path = filepath.split("/")
+
+    return split_file_path[-1]

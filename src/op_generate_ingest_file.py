@@ -2,28 +2,22 @@ from dateutil.parser import parse
 import logging
 import pandas as pd
 
-from . import shared_helpers, shared_azure_dl, shared_constants
-
-# import shared_helpers, shared_azure_dl, shared_constants
-
-
-columns = [
-    "Title",
-    "Date(1) Begin",
-    "Extent number",
-    "Top Container [indicator]",
-    "barcode",
-    "General",
-]
+from . import shared_helpers, shared_azure_dl
 
 
 def parse_date_entities(ner_df: pd.DataFrame) -> str:
 
     dates_df = ner_df.loc[ner_df["entity_group"] == "DATE"]
 
-    dates_df["parsed_date"] = dates_df["word"].apply(parse)
+    try:
 
-    parsed_dates = "\n".join(dates_df["parsed_date"])
+        dates_df["parsed_date"] = dates_df["word"].apply(parse)
+
+    except:
+
+        dates_df["parsed_date"] = dates_df["word"]
+
+    parsed_dates = "\n".join(dates_df["parsed_date"].astype(str))
 
     return parsed_dates
 
@@ -40,9 +34,6 @@ def format_named_entities(ner_df: pd.DataFrame, min_confidence=0.50) -> str:
     return named_entity_str
 
 
-#  function: get container name
-
-
 def retrieve_image_caption(file_id: str) -> str:
 
     caption_df = shared_azure_dl.read_df_from_data_lake(
@@ -54,15 +45,63 @@ def retrieve_image_caption(file_id: str) -> str:
     return image_caption
 
 
-def ingest_file(file_id: str) -> bool:
+def generate_ingest_row(file_id: str) -> dict:
 
-    ner_df = shared_azure_dl.read_df_from_data_lake("image-pipeline", "ner", file_id)
+    try:
 
-    formatted_ner = format_named_entities(ner_df)
+        ner_df = shared_azure_dl.read_df_from_data_lake(
+            "image-pipeline", "ner", file_id
+        )
 
-    parsed_date = parse_date_entities(ner_df)
+        if type(ner_df) == pd.DataFrame:
 
-    image_caption = retrieve_image_caption(file_id)
+            formatted_ner = format_named_entities(ner_df)
+            parsed_date = parse_date_entities(ner_df)
+        else:
+            formatted_ner = ""
+            parsed_date = ""
+
+        image_caption = retrieve_image_caption(file_id)
+
+        ocr_df = shared_azure_dl.read_df_from_data_lake(
+            "image-pipeline", "ocr", file_id, add_column_names=True
+        )
+
+        if type(ocr_df) == pd.DataFrame:
+            ocr_text = shared_helpers.convert_df_column_to_string(ocr_df, "text")
+        else:
+            ocr_text = ""
+
+        return {
+            "Title": file_id,
+            "Date(1) Begin": parsed_date,
+            "Extent number": "",
+            "Top Container [indicator]": "",
+            "barcode": "",
+            "General": "\n".join([ocr_text, image_caption, formatted_ner]),
+        }
+
+    except Exception as e:
+
+        print(f"ERROR {e}")
+        return {}
 
 
-ingest_file("018-POC/WIN_20240318_09_32_44_Pro")
+def generate_ingest_file(filepath: str) -> bool:
+
+    folder_name = shared_helpers.get_folder_name(filepath)
+
+    image_captures = shared_azure_dl.list_filenames_from_data_lake(filepath)
+    file_ids = [shared_helpers.get_file_id(capture) for capture in image_captures]
+
+    ingest_list = []
+    for file_id in file_ids:
+        ingest_row = generate_ingest_row(file_id)
+        ingest_list.append(ingest_row)
+
+    upload_df = pd.DataFrame(ingest_list)
+    upload_ingest_file = shared_azure_dl.upload_dataframe_to_data_lake(
+        "ingest-file", upload_df, folder_name
+    )
+
+    return upload_ingest_file
