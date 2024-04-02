@@ -8,25 +8,25 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="ocr", auth_level=func.AuthLevel.ANONYMOUS)
 def ocr(req: func.HttpRequest) -> func.HttpResponse:
-    result = despatch_job(req)
+    result = despatch_job.despatch_job(req)
     return result
 
 
 @app.route(route="ner", auth_level=func.AuthLevel.ANONYMOUS)
 def ner(req: func.HttpRequest) -> func.HttpResponse:
-    result = despatch_job(req)
+    result = despatch_job.despatch_job(req)
     return result
 
 
 @app.route(route="caption", auth_level=func.AuthLevel.ANONYMOUS)
 def caption(req: func.HttpRequest) -> func.HttpResponse:
-    result = despatch_job(req)
+    result = despatch_job.despatch_job(req)
     return result
 
 
 @app.route(route="ingest-file", auth_level=func.AuthLevel.ANONYMOUS)
 def ingest_file(req: func.HttpRequest) -> func.HttpResponse:
-    result = despatch_job(req)
+    result = despatch_job.despatch_job(req)
     return result
 
 
