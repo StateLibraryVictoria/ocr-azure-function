@@ -31,8 +31,8 @@ def caption(req: func.HttpRequest) -> func.HttpResponse:
 
 
 @app.blob_trigger(
-    arg_name="raw",
-    path="image-pipeline/image-capture",
+    arg_name="myblob",
+    path="raw/image-pipeline/image-capture",
     connection="DATA_LAKE_CONNECTION_STRING",
 )
 def BlobTrigger(myblob: func.InputStream):
