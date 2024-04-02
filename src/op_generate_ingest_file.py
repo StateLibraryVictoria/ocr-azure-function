@@ -2,9 +2,9 @@ from dateutil.parser import parse
 import logging
 import pandas as pd
 
-# from . import shared_helpers, shared_azure_dl, shared_constants
+from . import shared_helpers, shared_azure_dl, shared_constants
 
-import shared_helpers, shared_azure_dl, shared_constants
+# import shared_helpers, shared_azure_dl, shared_constants
 
 
 columns = [
@@ -43,7 +43,15 @@ def format_named_entities(ner_df: pd.DataFrame, min_confidence=0.50) -> str:
 #  function: get container name
 
 
-#  function: get image caption
+def retrieve_image_caption(file_id: str) -> str:
+
+    caption_df = shared_azure_dl.read_df_from_data_lake(
+        "image-pipeline", "caption", file_id
+    )
+
+    image_caption = "".join(caption_df["generated_text"].to_list())
+
+    return image_caption
 
 
 def ingest_file(file_id: str) -> bool:
@@ -53,6 +61,8 @@ def ingest_file(file_id: str) -> bool:
     formatted_ner = format_named_entities(ner_df)
 
     parsed_date = parse_date_entities(ner_df)
+
+    image_caption = retrieve_image_caption(file_id)
 
 
 ingest_file("018-POC/WIN_20240318_09_32_44_Pro")

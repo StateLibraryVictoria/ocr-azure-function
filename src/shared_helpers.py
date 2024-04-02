@@ -2,8 +2,9 @@ import os
 import pandas as pd
 import requests
 
-# from . import shared_constants
-import shared_constants
+from . import shared_constants
+
+# import shared_constants
 
 
 def get_file_id(file_path: str):
