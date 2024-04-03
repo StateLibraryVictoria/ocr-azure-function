@@ -25,7 +25,7 @@ def get_file_id(file_path: str):
     file_id = file_path_stem.split("/")
     if len(file_id) <= 2:
         return False
-    file_id = "/".join(file_id[2:])
+    file_id = "/".join(file_id[-2:])
 
     return file_id
 
