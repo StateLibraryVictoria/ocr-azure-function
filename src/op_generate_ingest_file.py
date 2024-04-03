@@ -46,7 +46,7 @@ def retrieve_image_caption(file_id: str) -> str:
 
 
 def generate_ingest_row(file_id: str) -> dict:
-
+    logging.info(f"Generating ingest row for {file_id}")
     try:
 
         ner_df = shared_azure_dl.read_df_from_data_lake(
@@ -72,6 +72,8 @@ def generate_ingest_row(file_id: str) -> dict:
         else:
             ocr_text = ""
 
+        logging.info(f"Ingest row successfully generated for {file_id}")
+
         return {
             "Title": file_id,
             "Date(1) Begin": parsed_date,
@@ -83,13 +85,15 @@ def generate_ingest_row(file_id: str) -> dict:
 
     except Exception as e:
 
-        print(f"ERROR {e}")
+        logging.error(f"An error occurred generating an ingest row for {file_id}: {e}")
         return {}
 
 
 def generate_ingest_file(filepath: str) -> bool:
 
     folder_name = shared_helpers.get_folder_name(filepath)
+
+    logging.info(f"Generating ingest file for {folder_name}")
 
     image_captures = shared_azure_dl.list_filenames_from_data_lake(filepath)
     file_ids = [shared_helpers.get_file_id(capture) for capture in image_captures]
@@ -100,6 +104,8 @@ def generate_ingest_file(filepath: str) -> bool:
         ingest_list.append(ingest_row)
 
     upload_df = pd.DataFrame(ingest_list)
+    logging.info(f"{len(upload_df)} non-empty rows generated for {folder_name}")
+
     upload_df["Top Container [indicator]"] = folder_name
     upload_ingest_file = shared_azure_dl.upload_dataframe_to_data_lake(
         "ingest-file", upload_df, folder_name
