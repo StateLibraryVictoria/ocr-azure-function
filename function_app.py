@@ -32,12 +32,46 @@ def ingest_file(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.blob_trigger(
     arg_name="blob",
-    path="raw/image-pipeline/{input_operation}/{folder}/{file_name}",
+    path="raw/image-pipeline/image-captures/{folder}/{file_name}.jpg",
     connection="DATA_LAKE_CONNECTION_STRING",
 )
-def image_processing_blob_trigger(blob: func.InputStream):
+def ocr_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    despatch_job.despatch_blob_job(blob)
+    logging.info(f"URI {blob.uri}")
+    despatch_job.despatch_blob_job(blob, "ocr")
+
+
+@app.blob_trigger(
+    arg_name="blob",
+    path="raw/image-pipeline/ocr/{folder}/{file_name}.txt",
+    connection="DATA_LAKE_CONNECTION_STRING",
+)
+def ner_blob_trigger(blob: func.InputStream):
+    logging.info(f"{blob.name} added to image pipeline")
+    logging.info(f"URI {blob.uri}")
+    despatch_job.despatch_blob_job(blob, "ner")
+
+
+@app.blob_trigger(
+    arg_name="blob",
+    path="raw/image-pipeline/ner/{folder}/{file_name}.txt",
+    connection="DATA_LAKE_CONNECTION_STRING",
+)
+def caption_blob_trigger(blob: func.InputStream):
+    logging.info(f"{blob.name} added to image pipeline")
+    logging.info(f"URI {blob.uri}")
+    despatch_job.despatch_blob_job(blob, "caption")
+
+
+@app.blob_trigger(
+    arg_name="blob",
+    path="raw/image-pipeline/caption/{folder}/{file_name}.txt",
+    connection="DATA_LAKE_CONNECTION_STRING",
+)
+def ingest_file_trigger(blob: func.InputStream):
+    logging.info(f"{blob.name} added to image pipeline")
+    logging.info(f"URI {blob.uri}")
+    despatch_job.despatch_blob_job(blob, "ingest-file")
 
 
 # @app.blob_trigger(

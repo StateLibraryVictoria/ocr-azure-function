@@ -24,19 +24,6 @@ def get_operation_function(operation):
     return op_function
 
 
-def get_blob_function(input_operation):
-    operations = {
-        "image-capture": op_ocr.ocr_image,
-        "ocr": op_ner.ner_ocr_output,
-        "ner": op_image_caption.caption_image,
-        "caption": op_generate_ingest_file.generate_ingest_file,
-    }
-
-    op_function = operations.get(input_operation)
-
-    return op_function
-
-
 def parse_http_request(req: func.HttpRequest) -> dict:
 
     request_params = req.params
@@ -82,20 +69,16 @@ def despatch_job(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(error_msg)
 
 
-def despatch_blob_job(blob: func.InputStream) -> bool:
-
-    input_operation = blob.name.split("/")[2]
-    output_operation = get_blob_function(input_operation)
-    if not output_operation:
-        logging.error(f"Could not match an output operation for {input_operation}")
-        return False
+def despatch_blob_job(blob: func.InputStream, operation: str) -> bool:
 
     file_id = shared_helpers.get_file_id(blob.name)
 
-    logging.info(f"Invoking {output_operation} on {file_id}")
+    logging.info(f"Invoking {operation} on {file_id}")
 
-    invoke_operation = output_operation(file_id)
+    op_function = get_operation_function(operation)
 
-    logging.info(f"{output_operation} invoked and complete: {invoke_operation}")
+    invoke_operation = op_function(file_id)
+
+    logging.info(f"{operation} invoked and complete: {invoke_operation}")
 
     return invoke_operation

@@ -105,28 +105,3 @@ def generate_ingest_file(file_id: str) -> bool:
     )
 
     return upload_ingest_file
-
-
-# def generate_ingest_file(filepath: str) -> bool:
-
-#     folder_name = shared_helpers.get_folder_name(filepath)
-
-#     logging.info(f"Generating ingest file for {folder_name}")
-
-#     image_captures = shared_azure_dl.list_filenames_from_data_lake(filepath)
-#     file_ids = [shared_helpers.get_file_id(capture) for capture in image_captures]
-
-#     ingest_list = []
-#     for file_id in file_ids:
-#         ingest_row = generate_ingest_row(file_id)
-#         ingest_list.append(ingest_row)
-
-#     upload_df = pd.DataFrame(ingest_list)
-#     logging.info(f"{len(upload_df)} rows generated for {folder_name}")
-
-#     upload_df["Top Container [indicator]"] = folder_name
-#     upload_ingest_file = shared_azure_dl.upload_dataframe_to_data_lake(
-#         "ingest-file", upload_df, folder_name, file_suffix="csv"
-#     )
-
-#     return upload_ingest_file
