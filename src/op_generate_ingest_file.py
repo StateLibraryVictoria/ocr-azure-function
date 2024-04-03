@@ -72,43 +72,61 @@ def generate_ingest_row(file_id: str) -> dict:
         else:
             ocr_text = ""
 
-        logging.info(f"Ingest row successfully generated for {file_id}")
-
         return {
             "Title": file_id,
             "Date(1) Begin": parsed_date,
             "Extent number": "",
             "Top Container [indicator]": "",
             "barcode": "",
+            "Image caption": image_caption,
+            "OCR text": ocr_text,
+            "Named entities": formatted_ner,
             "General": "\n".join([ocr_text, image_caption, formatted_ner]),
         }
 
     except Exception as e:
 
         logging.error(f"An error occurred generating an ingest row for {file_id}: {e}")
+        print(f"An error occurred generating an ingest row for {file_id}: {e}")
         return {}
 
 
-def generate_ingest_file(filepath: str) -> bool:
+def generate_ingest_file(file_id: str) -> bool:
 
-    folder_name = shared_helpers.get_folder_name(filepath)
+    ingest_row = generate_ingest_row(file_id)
+    folder_name = file_id.split("/")[0]
 
-    logging.info(f"Generating ingest file for {folder_name}")
-
-    image_captures = shared_azure_dl.list_filenames_from_data_lake(filepath)
-    file_ids = [shared_helpers.get_file_id(capture) for capture in image_captures]
-
-    ingest_list = []
-    for file_id in file_ids:
-        ingest_row = generate_ingest_row(file_id)
-        ingest_list.append(ingest_row)
-
-    upload_df = pd.DataFrame(ingest_list)
-    logging.info(f"{len(upload_df)} non-empty rows generated for {folder_name}")
+    upload_df = pd.DataFrame(ingest_row)
+    logging.info(f"Ingest file generated for generated for {file_id}")
 
     upload_df["Top Container [indicator]"] = folder_name
     upload_ingest_file = shared_azure_dl.upload_dataframe_to_data_lake(
-        "ingest-file", upload_df, folder_name
+        "ingest-file", upload_df, file_id
     )
 
     return upload_ingest_file
+
+
+# def generate_ingest_file(filepath: str) -> bool:
+
+#     folder_name = shared_helpers.get_folder_name(filepath)
+
+#     logging.info(f"Generating ingest file for {folder_name}")
+
+#     image_captures = shared_azure_dl.list_filenames_from_data_lake(filepath)
+#     file_ids = [shared_helpers.get_file_id(capture) for capture in image_captures]
+
+#     ingest_list = []
+#     for file_id in file_ids:
+#         ingest_row = generate_ingest_row(file_id)
+#         ingest_list.append(ingest_row)
+
+#     upload_df = pd.DataFrame(ingest_list)
+#     logging.info(f"{len(upload_df)} rows generated for {folder_name}")
+
+#     upload_df["Top Container [indicator]"] = folder_name
+#     upload_ingest_file = shared_azure_dl.upload_dataframe_to_data_lake(
+#         "ingest-file", upload_df, folder_name, file_suffix="csv"
+#     )
+
+#     return upload_ingest_file

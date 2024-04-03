@@ -1,7 +1,13 @@
 import azure.functions as func
 import logging
 
-from . import op_ner, op_ocr, op_image_caption, op_generate_ingest_file, shared_helpers
+from . import (
+    op_ner,
+    op_ocr,
+    op_image_caption,
+    op_generate_ingest_file,
+    shared_helpers,
+)
 
 
 def get_operation_function(operation):
@@ -14,6 +20,19 @@ def get_operation_function(operation):
     }
 
     op_function = operations.get(operation)
+
+    return op_function
+
+
+def get_blob_function(input_operation):
+    operations = {
+        "image-capture": op_ocr.ocr_image,
+        "ocr": op_ner.ner_ocr_output,
+        "ner": op_image_caption.caption_image,
+        "caption": op_generate_ingest_file.generate_ingest_file,
+    }
+
+    op_function = operations.get(input_operation)
 
     return op_function
 
@@ -61,3 +80,22 @@ def despatch_job(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(error_msg)
 
         return func.HttpResponse(error_msg)
+
+
+def despatch_blob_job(blob: func.InputStream) -> bool:
+
+    input_operation = blob.name.split("/")[2]
+    output_operation = get_blob_function(input_operation)
+    if not output_operation:
+        logging.error(f"Could not match an output operation for {input_operation}")
+        return False
+
+    file_id = shared_helpers.get_file_id(blob.name)
+
+    logging.info(f"Invoking {output_operation} on {file_id}")
+
+    invoke_operation = output_operation(file_id)
+
+    logging.info(f"{output_operation} invoked and complete: {invoke_operation}")
+
+    return invoke_operation
