@@ -69,16 +69,3 @@ def caption_blob_trigger(blob: func.InputStream):
 def ingest_file_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
     despatch_job.despatch_blob_job(blob, "ingest-file")
-
-
-# @app.blob_trigger(
-#     arg_name="myblob",
-#     path="raw/image-pipeline/image-capture/{folder}/{file_name}.jpg",
-#     connection="DATA_LAKE_CONNECTION_STRING",
-# )
-# def image_pipeline(myblob: func.InputStream):
-#     logging.info(
-#         f"Python blob trigger function processed blob"
-#         f"Name: {myblob.name}"
-#         f"Blob Size: {myblob.length} bytes"
-#     )

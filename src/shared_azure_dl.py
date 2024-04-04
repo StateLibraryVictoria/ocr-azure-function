@@ -143,11 +143,13 @@ def read_df_from_data_lake(
 
     logging.info(f"{len(split_contents)} rows read from {file_path}")
 
-    df = pd.DataFrame(data=split_contents, index=None)
+    df = pd.DataFrame.from_dict(split_contents)
 
     if add_column_names:
         df = df.rename(columns=df.iloc[0])
     df = df.drop(df.index[0])
+
+    logging.info(f"{len(df)} rows in df {file_path}")
 
     return df
 
