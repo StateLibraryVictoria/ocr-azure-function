@@ -1,5 +1,6 @@
 import azure.functions as func
 import logging
+from time import sleep
 
 from src import despatch_job
 
@@ -37,7 +38,11 @@ def ingest_file(req: func.HttpRequest) -> func.HttpResponse:
 )
 def ocr_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    despatch_job.despatch_blob_job(blob, "ocr")
+    job_complete = despatch_job.despatch_blob_job(blob, "ocr")
+
+    if job_complete == False:
+        sleep(2)
+        despatch_job.despatch_blob_job(blob, "ocr")
 
 
 @app.blob_trigger(
@@ -47,7 +52,10 @@ def ocr_blob_trigger(blob: func.InputStream):
 )
 def ner_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    despatch_job.despatch_blob_job(blob, "ner")
+    job_complete = despatch_job.despatch_blob_job(blob, "ner")
+    if job_complete == False:
+        sleep(2)
+        despatch_job.despatch_blob_job(blob, "ner")
 
 
 @app.blob_trigger(
@@ -57,7 +65,10 @@ def ner_blob_trigger(blob: func.InputStream):
 )
 def caption_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    despatch_job.despatch_blob_job(blob, "caption")
+    job_complete = despatch_job.despatch_blob_job(blob, "caption")
+    if job_complete == False:
+        sleep(2)
+        despatch_job.despatch_blob_job(blob, "caption")
 
 
 @app.blob_trigger(
@@ -67,7 +78,10 @@ def caption_blob_trigger(blob: func.InputStream):
 )
 def ingest_file_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    despatch_job.despatch_blob_job(blob, "ingest-file")
+    job_complete = despatch_job.despatch_blob_job(blob, "ingest-file")
+    if job_complete == False:
+        sleep(2)
+        despatch_job.despatch_blob_job(blob, "ingest-file")
 
 
 # @app.blob_trigger(

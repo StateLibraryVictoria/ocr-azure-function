@@ -73,12 +73,20 @@ def despatch_blob_job(blob: func.InputStream, operation: str) -> bool:
 
     file_id = shared_helpers.get_file_id(blob.name)
 
-    logging.info(f"Invoking {operation} on {file_id}")
+    try:
 
-    op_function = get_operation_function(operation)
+        logging.info(f"Invoking {operation} on {file_id}")
 
-    invoke_operation = op_function(file_id)
+        op_function = get_operation_function(operation)
 
-    logging.info(f"{operation} invoked and complete: {invoke_operation}")
+        invoke_operation = op_function(file_id)
 
-    return invoke_operation
+        logging.info(f"{operation} invoked and complete: {invoke_operation}")
+
+        return invoke_operation
+
+    except Exception as e:
+
+        logging.error(f"Error encountered while invoking {operation} for {file_id}")
+
+        return False
