@@ -11,7 +11,7 @@ def caption_image(file_id: str):
         shared_constants.HF_IMAGE_CAPTION_MODEL, data=image_data
     )
 
-    image_caption_df = pd.DataFrame(image_caption)
+    image_caption_df = pd.DataFrame.from_dict(image_caption)
 
     upload = shared_azure_dl.upload_dataframe_to_data_lake(
         "caption", image_caption_df, file_id
