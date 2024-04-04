@@ -1,4 +1,5 @@
 import os
+import logging
 import pandas as pd
 import requests
 
@@ -66,6 +67,11 @@ def call_hf_model(model: str, payload={}, data={}):
     headers = {"Authorization": f"Bearer {os.environ.get('HF_API_KEY')}"}
 
     response = requests.post(hf_model_api, headers=headers, json=payload, data=data)
+
+    logging.info(
+        f"Response code: {response.status_code}. JSON returned {response.json()}"
+    )
+
     if response.status_code == 503:
         payload["wait_for_model"] = True
         return call_hf_model(model, payload=payload, data=data)

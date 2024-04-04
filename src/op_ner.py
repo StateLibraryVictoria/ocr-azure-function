@@ -17,11 +17,11 @@ def ner_ocr_output(file_id: str):
     ner_list = shared_helpers.call_hf_model(
         shared_constants.HF_NER_MODEL, payload=payload
     )
-    logging.info(f"1: {len(ner_list)} named entities recognised for {file_id}")
+    logging.info(f"{len(ner_list)} named entities recognised for {file_id}")
+    if len(ner_df) == 1:
+        logging.info(f"DF {ner_df}")
 
     ner_df = pd.DataFrame.from_dict(ner_list)
-
-    logging.info(f"2: {len(ner_list)} named entities recognised for {file_id}")
 
     upload = shared_azure_dl.upload_dataframe_to_data_lake("ner", ner_df, file_id)
 
