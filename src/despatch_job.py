@@ -87,6 +87,6 @@ def despatch_blob_job(blob: func.InputStream, operation: str) -> bool:
 
     except Exception as e:
 
-        logging.error(f"Error encountered while invoking {operation} for {file_id}")
-
-        return False
+        logging.error(
+            f"Error encountered while invoking {operation} for {file_id}: {e}"
+        )

@@ -38,11 +38,7 @@ def ingest_file(req: func.HttpRequest) -> func.HttpResponse:
 )
 def ocr_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    job_complete = despatch_job.despatch_blob_job(blob, "ocr")
-
-    if job_complete == False:
-        sleep(2)
-        despatch_job.despatch_blob_job(blob, "ocr")
+    despatch_job.despatch_blob_job(blob, "ocr")
 
 
 @app.blob_trigger(
@@ -52,10 +48,7 @@ def ocr_blob_trigger(blob: func.InputStream):
 )
 def ner_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    job_complete = despatch_job.despatch_blob_job(blob, "ner")
-    if job_complete == False:
-        sleep(2)
-        despatch_job.despatch_blob_job(blob, "ner")
+    despatch_job.despatch_blob_job(blob, "ner")
 
 
 @app.blob_trigger(
@@ -65,10 +58,7 @@ def ner_blob_trigger(blob: func.InputStream):
 )
 def caption_blob_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    job_complete = despatch_job.despatch_blob_job(blob, "caption")
-    if job_complete == False:
-        sleep(2)
-        despatch_job.despatch_blob_job(blob, "caption")
+    despatch_job.despatch_blob_job(blob, "caption")
 
 
 @app.blob_trigger(
@@ -78,10 +68,7 @@ def caption_blob_trigger(blob: func.InputStream):
 )
 def ingest_file_trigger(blob: func.InputStream):
     logging.info(f"{blob.name} added to image pipeline")
-    job_complete = despatch_job.despatch_blob_job(blob, "ingest-file")
-    if job_complete == False:
-        sleep(2)
-        despatch_job.despatch_blob_job(blob, "ingest-file")
+    despatch_job.despatch_blob_job(blob, "ingest-file")
 
 
 # @app.blob_trigger(
