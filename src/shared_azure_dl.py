@@ -141,8 +141,6 @@ def read_df_from_data_lake(
         label.split(f"{delimiter}") for label in file_contents.splitlines()
     ]
 
-    logging.info(f"{len(split_contents)} rows read from {file_path}")
-
     df = pd.DataFrame.from_dict(split_contents)
 
     if add_column_names:
