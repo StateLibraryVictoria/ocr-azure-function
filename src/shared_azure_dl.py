@@ -60,6 +60,8 @@ def upload_to_data_lake(file_system: str, file_path: str, file_contents: str) ->
             file_client.append_data(file_contents, offset=0, length=len(file_contents))
             file_client.flush_data(len(file_contents))
 
+        file_client.close()
+
         logging.info(f"{file_path} uploaded successfully to {file_system}")
 
         return True
